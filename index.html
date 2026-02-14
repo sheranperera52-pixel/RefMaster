@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RefriMaster PRO | Sri Lanka Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #0a0a0a;
+            --sl-yellow: #FFBE29;
+            --sl-green: #005f4b;
+            --sl-red: #8D153A;
+            --sl-orange: #FF4E00;
+            --text-main: #f8fafc;
+            --text-dim: #cbd5e1;
+            --suction-clr: #00ff88;
+            --discharge-clr: #ff4444;
+            --clr-r22: #4CAF50;
+            --clr-r134a: #03A9F4;
+            --clr-r404a: #FF9800;
+            --clr-r407c: #8D6E63;
+            --clr-r410a: #E91E63;
+            --clr-r600a: #FF5722;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+        body, html {
+            height: 100%; width: 100%;
+            background-color: var(--bg-deep);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            position: fixed;
+        }
+
+        #app-viewport {
+            width: 100vw; height: 100vh;
+            display: flex; flex-direction: column;
+            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
+        }
+
+        /* Top Owner Tag Styling */
+        .top-owner-badge {
+            position: absolute;
+            top: 10px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        .owner-name {
+            font-family: 'Orbitron';
+            font-size: 0.55rem;
+            color: var(--text-dim);
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            opacity: 0.6;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 4px 15px;
+            border-radius: 20px;
+            border: 0.5px solid rgba(255, 255, 255, 0.1);
+        }
+
+        #lang-switch {
+            position: absolute; top: 15px; right: 15px; z-index: 1001;
+            background: rgba(255, 190, 41, 0.2); border: 1px solid var(--sl-yellow);
+            padding: 6px 12px; border-radius: 20px; cursor: pointer;
+            font-family: 'Orbitron'; font-size: 0.7rem; color: var(--sl-yellow);
+        }
+
+        header { text-align: center; padding: 60px 0 20px 0; }
+        header h1 { font-family: 'Orbitron'; font-size: 1.6rem; letter-spacing: 3px; color: var(--sl-yellow); text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+        header h1 span { color: #fff; }
+
+        .main-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 15px; padding: 20px; flex: 1; align-content: center;
+        }
+
+        .nav-card {
+            background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255,190,41,0.1);
+            border-radius: 20px; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; cursor: pointer;
+            transition: 0.3s; position: relative; padding: 20px 5px;
+            overflow: hidden;
+        }
+
+        .bottle {
+            width: 65px; height: 95px; border-radius: 12px 12px 20px 20px;
+            position: relative; z-index: 2; overflow: hidden;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.6), 0 5px 15px rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .gas-label { font-family: 'Orbitron'; font-size: 0.85rem; font-weight: 800; color: #fff; text-shadow: 2px 2px 4px #000; z-index: 10; text-align: center; }
+        .bubbles { position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+        .bubble { position: absolute; bottom: -10px; background: rgba(255,255,255,0.4); border-radius: 50%; animation: rise var(--t) infinite ease-in; }
+
+        @keyframes rise {
+            0% { transform: translateY(0) scale(1); opacity: 0; }
+            20% { opacity: 0.6; }
+            100% { transform: translateY(-100px) scale(1.5); opacity: 0; }
+        }
+
+        .card-r22 .bottle { background-color: var(--clr-r22); }
+        .card-r134a .bottle { background-color: var(--clr-r134a); }
+        .card-r404a .bottle { background-color: var(--clr-r404a); }
+        .card-r407c .bottle { background-color: var(--clr-r407c); }
+        .card-r410a .bottle { background-color: var(--clr-r410a); }
+        .card-r600a .bottle { background-color: var(--clr-r600a); }
+
+        .action-row { grid-column: span 3; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
+        .btn-large {
+            height: 65px; border-radius: 15px; display: flex; align-items: center;
+            justify-content: center; gap: 8px; cursor: pointer;
+            border: 1px solid var(--sl-yellow); background: rgba(255, 190, 41, 0.1);
+            font-size: 0.8rem; font-weight: 700; color: var(--sl-yellow);
+        }
+
+        .panel-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: none; flex-direction: column; background: var(--bg-deep);
+            z-index: 2000;
+        }
+
+        .panel-header {
+            padding: 15px 20px; display: flex; justify-content: space-between;
+            align-items: center; border-bottom: 2px solid var(--sl-yellow);
+            background: #1a1a1a;
+        }
+
+        .panel-header h2 { font-family: 'Orbitron'; color: var(--sl-yellow); font-size: 0.9rem; }
+        
+        .panel-content { 
+            padding: 20px; 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+            overflow-y: auto;
+        }
+
+        .form-group { margin-bottom: 12px; }
+        label { display: block; font-size: 0.75rem; color: var(--sl-yellow); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        input, select {
+            width: 100%; padding: 12px; background: #151515; border: 1px solid #333;
+            border-radius: 10px; color: #fff; font-size: 0.9rem; transition: 0.3s;
+        }
+        input:focus { border-color: var(--sl-yellow); outline: none; background: #202020; }
+
+        .result-box {
+            background: linear-gradient(135deg, #1a1a1a, #0a0a0a); 
+            border: 1px solid var(--sl-yellow);
+            border-radius: 15px; padding: 20px; margin-top: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+        }
+
+        .footer-credits {
+            text-align: center; padding: 15px; background: rgba(0,0,0,0.4);
+        }
+        .owner-tag {
+            font-family: 'Orbitron'; font-size: 0.6rem; color: #777; 
+            letter-spacing: 4px; text-transform: uppercase; margin-bottom: 5px;
+        }
+        .reg-tag {
+            font-size: 0.55rem; color: #666; font-weight: 400; line-height: 1.4;
+        }
+
+        .unit-price-box {
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); 
+            border-radius: 10px; padding: 12px; margin-top: 15px; font-size: 0.65rem;
+            color: var(--text-dim);
+        }
+
+        .back-btn { background: var(--sl-yellow); color: #000; border: none; padding: 8px 15px; border-radius: 6px; font-family: 'Orbitron'; font-weight: 800; font-size: 0.7rem; }
+        
+        .highlight-red { color: #ff4444; font-weight: 800; }
+
+        @media (max-width: 400px) {
+            header { padding: 40px 0 10px 0; }
+            header h1 { font-size: 1.2rem; }
+            .main-grid { gap: 10px; padding: 10px; }
+            .bottle { width: 50px; height: 75px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top-owner-badge">
+        <div class="owner-name">SHERAN</div>
+    </div>
+
+    <div id="lang-switch" onclick="toggleLang()">Eng / සිංහල</div>
+
+    <div id="app-viewport">
+        <div id="dashboard-view" style="display: flex; flex-direction: column; height: 100%;">
+            <header>
+                <h1>REFRI<span>MASTER</span> PRO</h1>
+                <p id="sub-title" style="color: var(--sl-yellow); font-size: 0.55rem; letter-spacing: 2px; opacity: 0.8;">SRI LANKA ENGINEERING SUITE 2026</p>
+            </header>
+
+            <div class="main-grid">
+                <div class="nav-card card-r22" onclick="openGas('R-22')">
+                    <div class="bottle"><div class="gas-label">R22</div><div class="bubbles"></div></div>
+                </div>
+                <div class="nav-card card-r134a" onclick="openGas('R-134a')">
+                    <div class="bottle"><div class="gas-label">R134A</div><div class="bubbles"></div></div>
+                </div>
+                <div class="nav-card card-r404a" onclick="openGas('R-404A')">
+                    <div class="bottle"><div class="gas-label">R404A</div><div class="bubbles"></div></div>
+                </div>
+                <div class="nav-card card-r407c" onclick="openGas('R-407C')">
+                    <div class="bottle"><div class="gas-label">R407C</div><div class="bubbles"></div></div>
+                </div>
+                <div class="nav-card card-r410a" onclick="openGas('R-410A')">
+                    <div class="bottle"><div class="gas-label">R410A</div><div class="bubbles"></div></div>
+                </div>
+                <div class="nav-card card-r600a" onclick="openGas('R-600a')">
+                    <div class="bottle"><div class="gas-label">R600A</div><div class="bubbles"></div></div>
+                </div>
+
+                <div class="action-row">
+                    <div class="btn-large" onclick="openPanel('btu-panel')">📏 <span id="btu-btn-txt">BTU CALCULATOR</span></div>
+                    <div class="btn-large" onclick="openPanel('bill-panel')">🇱🇰 <span id="bill-btn-txt">ELECTRICITY 2026</span></div>
+                </div>
+            </div>
+
+            <div class="footer-credits">
+                <div class="owner-tag">App Owner: sheran</div>
+                <div class="reg-tag" id="reg-info">CEB regulations applied based on Jan 2025 Approved Tariff (Annex-2). Data includes updated unit charges and fixed costs.</div>
+            </div>
+        </div>
+
+        <div id="gas-panel" class="panel-overlay">
+            <div class="panel-header">
+                <h2 id="gas-title-ui">GAS SPECIFICATIONS</h2>
+                <button class="back-btn" onclick="closePanel('gas-panel')">BACK</button>
+            </div>
+            <div class="panel-content">
+                <div style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 20px; border-left: 4px solid var(--sl-yellow);">
+                    <div class="form-group"><label id="l-type">Type</label><div id="v-type" style="font-weight:700; font-size: 1.1rem;">--</div></div>
+                    <div class="form-group"><label id="l-oil">Oil</label><div id="v-oil" style="font-weight:700; font-size: 1.1rem;">--</div></div>
+                    <div class="form-group"><label id="l-suction">Suction Pressure</label><div id="v-suction" style="color:var(--suction-clr); font-weight:700; font-size: 1.1rem;">--</div></div>
+                    <div class="form-group"><label id="l-discharge">Discharge Pressure</label><div id="v-discharge" style="color:var(--discharge-clr); font-weight:700; font-size: 1.1rem;">--</div></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="bill-panel" class="panel-overlay">
+            <div class="panel-header">
+                <h2 id="bill-title-ui">ELECTRICITY 2026</h2>
+                <button class="back-btn" onclick="closePanel('bill-panel')">BACK</button>
+            </div>
+            <div class="panel-content">
+                <div class="form-group">
+                    <label id="l-watts">Other Equipment Watts (Usage)</label>
+                    <input type="number" id="manual-watts" placeholder="Enter Watts (e.g. 500)" value="0">
+                </div>
+                <div id="ac-container"></div>
+                <button id="add-ac-btn" class="btn-large" style="width:100%; margin-bottom:15px;" onclick="addNewAC()">+ ADD AC UNIT</button>
+                <div class="form-group">
+                    <label id="l-hrs">Monthly Working Hours (Avg)</label>
+                    <input type="number" id="ac-total-hrs" value="240">
+                </div>
+                <button onclick="calcBill()" id="bill-run" style="width:100%; padding:15px; background:var(--sl-yellow); border:none; border-radius:10px; font-family:'Orbitron'; font-weight:800; color:#000;">GENERATE ESTIMATE</button>
+                <div class="result-box" id="bill-res">
+                    <div style="font-size:0.7rem; color:var(--text-dim)" id="l-cost">Estimated Monthly Cost</div>
+                    <div id="v-bill" style="font-size:1.8rem; color:var(--sl-yellow); font-family: 'Orbitron'; margin: 10px 0;">LKR 0.00</div>
+                    <div style="font-size:0.75rem; border-top: 1px solid #333; padding-top: 10px;">
+                        <span id="l-tu">Total:</span> <span id="v-u" class="highlight-red">0</span> Units (kWh) | 
+                        <span id="l-fix">Fixed:</span> <span id="v-fix">LKR 0</span>
+                    </div>
+                </div>
+                <div class="unit-price-box" id="tariff-details">
+                    <strong id="up-title">Domestic Tariff (Eff. 18th Jan 2025):</strong><br>
+                    <span id="up-rates">0-30: 4.00 | 31-60: 6.00 | 61-90: 14.00 | 91-120: 20.00 | 121-180: 33.00 | >180: 52.00</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="btu-panel" class="panel-overlay">
+            <div class="panel-header">
+                <h2 id="btu-title-ui">PRO BTU CALCULATOR</h2>
+                <button class="back-btn" onclick="closePanel('btu-panel')">BACK</button>
+            </div>
+            <div class="panel-content">
+                <div class="form-group"><label id="l-len">Room Length (ft)</label><input type="number" id="bi-l" value="12"></div>
+                <div class="form-group"><label id="l-wid">Room Width (ft)</label><input type="number" id="bi-w" value="10"></div>
+                <div class="form-group"><label id="l-ppl">Number of People</label><input type="number" id="bi-p" value="2"></div>
+                <div class="form-group">
+                    <label id="l-temp">Outside Condition</label>
+                    <select id="bi-temp">
+                        <option value="1">Normal (30°C - 32°C)</option>
+                        <option value="1.15">Hot / Direct Sun (33°C - 36°C)</option>
+                        <option value="1.25">Very Hot (Above 36°C)</option>
+                    </select>
+                </div>
+                <button onclick="calcBTUPro()" id="btu-run" style="width:100%; padding:15px; background:var(--sl-yellow); border:none; border-radius:10px; font-family:'Orbitron'; font-weight:800;">CALCULATE CAPACITY</button>
+                <div class="result-box" id="btu-res" style="display:none;">
+                    <div style="font-size:0.7rem; color:var(--text-dim)" id="l-rec">Recommended Cooling Capacity</div>
+                    <div id="v-btu" style="font-size:2rem; color:var(--sl-yellow); font-family:'Orbitron';">-- BTU</div>
+                    <div id="v-ton" style="font-size:0.8rem; color:#fff; margin-top:5px;">(-- Tons)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let curL = 'en';
+        let acCount = 0;
+
+        const kwMap = {
+            'inv': { '9000': 0.55, '12000': 0.85, '18000': 1.3, '24000': 1.7, '36000': 2.6 },
+            'non': { '9000': 0.9, '12000': 1.2, '18000': 1.8, '24000': 2.4, '36000': 3.6 }
+        };
+
+        const trans = {
+            en: { 
+                sub: 'SRI LANKA ENGINEERING SUITE 2026', btuB: 'BTU CALCULATOR', billB: 'ELECTRICITY 2026', 
+                reg: 'CEB regulations applied based on Jan 2025 Approved Tariff (Annex-2).',
+                hrs: 'Monthly Working Hours (Avg)', est: 'GENERATE ESTIMATE', mc: 'Estimated Monthly Cost',
+                len: 'Room Length (ft)', wid: 'Room Width (ft)', ppl: 'Number of People', temp: 'Outside Condition',
+                upTitle: 'Domestic Tariff (Eff. 18th Jan 2025):',
+                tu: 'Total:', fix: 'Fixed:', units: 'Units (kWh)', watts: 'Other Equipment Watts (Usage)'
+            },
+            si: { 
+                sub: 'ශ්‍රී ලංකා ඉංජිනේරු මෙවලම් 2026', btuB: 'BTU ගණනය', billB: 'විදුලි බිල 2026', 
+                reg: 'CEB 2025 ජනවාරි 18 සිට බලපැවැත්වෙන අනුමත ගාස්තු අනුව සකසා ඇත (Annex-2).',
+                hrs: 'මාසික වැඩකරන පැය ගණන', est: 'බිල පෙන්වන්න', mc: 'මාසික විදුලි පිරිවැය',
+                len: 'කාමරයේ දිග (අඩි)', wid: 'කාමරයේ පළල (අඩි)', ppl: 'පුද්ගලයින් ගණන', temp: 'බාහිර උෂ්ණත්වය',
+                upTitle: 'නිවාස විදුලි ගාස්තු (2025 ජනවාරි 18 සිට):',
+                tu: 'මුළු ඒකක:', fix: 'ස්ථාවර ගාස්තුව:', units: 'ඒකක (kWh)', watts: 'වෙනත් උපකරණ වොට් (Watts)'
+            }
+        };
+
+        function toggleLang() {
+            curL = curL === 'en' ? 'si' : 'en';
+            const t = trans[curL];
+            document.getElementById('sub-title').innerText = t.sub;
+            document.getElementById('btu-btn-txt').innerText = t.btuB;
+            document.getElementById('bill-btn-txt').innerText = t.billB;
+            document.getElementById('reg-info').innerText = t.reg;
+            document.getElementById('l-hrs').innerText = t.hrs;
+            document.getElementById('bill-run').innerText = t.est;
+            document.getElementById('l-cost').innerText = t.mc;
+            document.getElementById('l-len').innerText = t.len;
+            document.getElementById('l-wid').innerText = t.wid;
+            document.getElementById('l-ppl').innerText = t.ppl;
+            document.getElementById('l-temp').innerText = t.temp;
+            document.getElementById('up-title').innerText = t.upTitle;
+            document.getElementById('l-tu').innerText = t.tu;
+            document.getElementById('l-fix').innerText = t.fix;
+            document.getElementById('l-watts').innerText = t.watts;
+        }
+
+        function addNewAC() {
+            acCount++;
+            const container = document.getElementById('ac-container');
+            const div = document.createElement('div');
+            div.style.cssText = "display:grid; grid-template-columns:1fr 1fr 60px 40px; gap:8px; margin-bottom:10px;";
+            div.innerHTML = `
+                <select id="ac-${acCount}-r">
+                    <option value="9000">9000 BTU</option><option value="12000">12000 BTU</option>
+                    <option value="18000">18000 BTU</option><option value="24000">24000 BTU</option>
+                    <option value="36000">36000 BTU</option>
+                </select>
+                <select id="ac-${acCount}-t"><option value="inv">Inverter</option><option value="non">Non-Inv</option></select>
+                <input type="number" id="ac-${acCount}-qty" value="1">
+                <button onclick="this.parentElement.remove()" style="background:#8D153A; border:none; color:white; border-radius:8px;">✕</button>
+            `;
+            container.appendChild(div);
+        }
+
+        function calcBill() {
+            const totalHrs = parseFloat(document.getElementById('ac-total-hrs').value) || 0;
+            const manualWatts = parseFloat(document.getElementById('manual-watts').value) || 0;
+            let totalUnits = 0;
+            
+            document.querySelectorAll('[id^="ac-"][id$="-r"]').forEach(el => {
+                const id = el.id.split('-')[1];
+                const btu = el.value;
+                const type = document.getElementById(`ac-${id}-t`).value;
+                const qty = parseInt(document.getElementById(`ac-${id}-qty`).value) || 0;
+                totalUnits += (kwMap[type][btu] * totalHrs * qty);
+            });
+
+            totalUnits += ((manualWatts / 1000) * totalHrs);
+
+            let u = Math.ceil(totalUnits);
+            let energyCharge = 0, fix = 0;
+
+            if (u <= 60) {
+                if (u <= 30) { energyCharge = u * 4.00; fix = 75.00; } 
+                else { energyCharge = (30 * 4.00) + ((u - 30) * 6.00); fix = 200.00; }
+            } else {
+                let rem = u;
+                let b1 = Math.min(rem, 60); energyCharge += b1 * 11.00; rem -= b1;
+                if(rem > 0) { let b2 = Math.min(rem, 30); energyCharge += b2 * 14.00; rem -= b2; }
+                if(rem > 0) { let b3 = Math.min(rem, 30); energyCharge += b3 * 20.00; rem -= b3; }
+                if(rem > 0) { let b4 = Math.min(rem, 60); energyCharge += b4 * 33.00; rem -= b4; }
+                if(rem > 0) { energyCharge += rem * 52.00; }
+
+                if (u <= 90) fix = 400.00;
+                else if (u <= 120) fix = 1000.00;
+                else if (u <= 180) fix = 1500.00;
+                else fix = 2000.00;
+            }
+
+            document.getElementById('v-u').innerText = u;
+            document.getElementById('v-fix').innerText = "LKR " + fix.toFixed(2);
+            document.getElementById('v-bill').innerText = "LKR " + (energyCharge + fix).toLocaleString(undefined, {minimumFractionDigits: 2});
+        }
+
+        function calcBTUPro() {
+            const l = parseFloat(document.getElementById('bi-l').value) || 0;
+            const w = parseFloat(document.getElementById('bi-w').value) || 0;
+            const p = parseFloat(document.getElementById('bi-p').value) || 0;
+            const factor = parseFloat(document.getElementById('bi-temp').value);
+
+            let baseBTU = (l * w * 35);
+            let peopleLoad = (p * 500);
+            let totalBTU = (baseBTU + peopleLoad) * factor;
+
+            let finalBTU = Math.ceil(totalBTU);
+            if(finalBTU < 9000) finalBTU = 9000;
+            if(finalBTU > 36000) finalBTU = 36000; 
+
+            document.getElementById('btu-res').style.display = 'block';
+            document.getElementById('v-btu').innerText = finalBTU.toLocaleString() + " BTU";
+            document.getElementById('v-ton').innerText = "(" + (finalBTU/12000).toFixed(1) + " Tons)";
+        }
+
+        function openGas(id) {
+            const gData = { 
+                'R-22': ['HCFC', 'Mineral', '60-75 PSI', '225-250 PSI'], 
+                'R-134a': ['HFC', 'PAG', '25-35 PSI', '140-170 PSI'], 
+                'R-404A': ['HFC', 'POE', '65-85 PSI', '250-290 PSI'], 
+                'R-407C': ['HFC', 'POE', '65-80 PSI', '230-270 PSI'], 
+                'R-410A': ['HFC', 'POE', '110-130 PSI', '350-450 PSI'], 
+                'R-600a': ['HC', 'Mineral', '0-5 PSI', '90-110 PSI'] 
+            };
+            document.getElementById('v-type').innerText = gData[id][0];
+            document.getElementById('v-oil').innerText = gData[id][1];
+            document.getElementById('v-suction').innerText = gData[id][2];
+            document.getElementById('v-discharge').innerText = gData[id][3];
+            openPanel('gas-panel');
+        }
+
+        function openPanel(id) { 
+            document.getElementById(id).style.display = 'flex'; 
+            if(id === 'bill-panel' && acCount === 0) addNewAC();
+        }
+        function closePanel(id) { document.getElementById(id).style.display = 'none'; }
+
+        function createBubbles() {
+            document.querySelectorAll('.bubbles').forEach(container => {
+                for(let i=0; i<6; i++) {
+                    const b = document.createElement('div'); b.className = 'bubble';
+                    const size = Math.random() * 5 + 3 + 'px';
+                    b.style.width = size; b.style.height = size; b.style.left = Math.random() * 100 + '%';
+                    b.style.setProperty('--t', Math.random() * 2 + 2 + 's');
+                    container.appendChild(b);
+                }
+            });
+        }
+        window.onload = createBubbles;
+    </script>
+</body>
+</html>
